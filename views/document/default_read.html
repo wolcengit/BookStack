@@ -57,7 +57,9 @@
                     {{/*<a title="分享" href="javascript:" data-toggle="modal" data-target="#ModalShare" class="btn btn-default"><i class="fa fa-share-alt"></i> 分享</a>*/}}
                     <a title="首页" href="/" class="btn btn-default"><i class="fa fa-home"></i> 首页</a>
                     <a title="下载" href="javascript:" data-toggle="modal" data-target="#ModalDownload" class="btn btn-default"><i class="fa fa-cloud-download"></i> 下载</a>
+                    {{if eq .Member.Role 0}}
                     <a href="#" data-target="#ModalShare" data-toggle="modal" class="btn btn-default"><i class="fa fa-share-alt"></i> 分享</a>
+                    {{end}}
                     <div class="btn-group">
                         <a rel="nofollow" href="{{urlfor "BookmarkController.List" ":book_id" .Model.BookId}}" title="查看书签" rel="nofollow" data-bookid="{{.Model.BookId}}" class="btn btn-default showModalBookmark">
                             <img src="/static/images/icon-bookmark-list.png" alt="书签"> 书签
@@ -116,9 +118,11 @@
                             <li class="visible-xs visible-sm bars-menu bars-menu-hide">
                                 <a title="下载" href="javascript:" data-toggle="modal" data-target="#ModalDownload"><i class="fa fa-cloud-download"></i></a>
                             </li>
+                            {{if eq .Member.Role 0}}
                             <li class="visible-xs visible-sm bars-menu bars-menu-hide">
                                 <a title="分享" href="javascript:" data-toggle="modal" data-target="#ModalShare"><i class="fa fa-share-alt"></i></a>
                             </li>
+                            {{end}}
                             <li class="visible-xs visible-sm bars-menu bars-menu-hide">
                                 <a title="阅读记录" class="showModalHistory" href="{{urlfor "RecordController.List" ":book_id" .Model.BookId}}" rel="nofollow"><i class="fa fa-clock-o"></i></a>
                             </li>
@@ -193,7 +197,7 @@
             </div>
             <div class="m-copyright">
                 <p>
-                    本文档使用 <a href="//www.bookstack.cn" style="color: #0e8c8c;font-weight: bold" target="_blank">书栈(BookStack.CN)</a> 构建
+                    本文档使用 <a href="https://github.com/wolcengit/BookStack" style="color: #0e8c8c;font-weight: bold" target="_blank">Z-BookStack</a> 构建
                 </p>
             </div>
         </div>

@@ -1099,3 +1099,116 @@ func (this *BookController) Comment() {
 		this.JsonResult(1, "文档项目不存在")
 	}
 }
+
+// Links 链接列表.
+func (this *BookController) Links() {
+	this.TplName = "book/links.html"
+
+	if this.Ctx.Input.IsPost() {
+		book_name := strings.TrimSpace(this.GetString("book_name", ""))
+		identify := strings.TrimSpace(this.GetString("identify", ""))
+		description := strings.TrimSpace(this.GetString("description", ""))
+		privately_owned, _ := strconv.Atoi(this.GetString("privately_owned"))
+		comment_status := this.GetString("comment_status")
+		link_id, _ := strconv.Atoi(this.GetString("link_id"))
+
+		if book_name == "" {
+			this.JsonResult(6001, "项目名称不能为空")
+		}
+		if identify == "" {
+			this.JsonResult(6002, "项目标识不能为空")
+		}
+		if ok, err := regexp.MatchString(`[a-zA-Z0-9_\-]*$`, identify); !ok || err != nil {
+			this.JsonResult(6003, "项目标识只能包含字母、数字，以及“-”和“_”符号头，且不能是纯数字")
+		}
+		if num, _ := strconv.Atoi(identify); strconv.Itoa(num) == identify {
+			this.JsonResult(6003, "项目标识只能包含字母、数字，以及“-”和“_”符号头，且不能是纯数字")
+		}
+		if strings.Count(identify, "") > 50 {
+			this.JsonResult(6004, "文档标识不能超过50字")
+		}
+		if strings.Count(description, "") > 500 {
+			this.JsonResult(6004, "项目描述不能大于500字")
+		}
+		if privately_owned != 0 && privately_owned != 1 {
+			privately_owned = 1
+		}
+		if comment_status != "open" && comment_status != "closed" && comment_status != "group_only" && comment_status != "registered_only" {
+			comment_status = "closed"
+		}
+
+		book := models.NewBook()
+
+		if books, _ := book.FindByField("identify", identify); len(books) > 0 {
+			this.JsonResult(6006, "项目标识已存在")
+		}
+
+		book.Label = utils.SegWord(book_name)
+		book.BookName = book_name
+		book.Description = description
+		book.CommentCount = 0
+		book.PrivatelyOwned = privately_owned
+		book.CommentStatus = comment_status
+		book.Identify = identify
+		book.DocCount = 0
+		book.MemberId = this.Member.MemberId
+		book.CommentCount = 0
+		book.Version = time.Now().Unix()
+		book.Cover = conf.GetDefaultCover()
+		book.Editor = "markdown"
+		book.Theme = "default"
+		book.Score = 40 //默认评分，40即表示4星
+		//设置默认时间，因为beego的orm好像无法设置datetime的默认值
+		defaultTime, _ := time.Parse("2006-01-02 15:04:05", "2006-01-02 15:04:05")
+		book.LastClickGenerate = defaultTime
+		book.GenerateTime, _ = time.Parse("2006-01-02 15:04:05", "2000-01-02 15:04:05") //默认生成文档的时间
+		book.ReleaseTime = defaultTime
+		book.LinkId = link_id
+		book.LinkDocs = ""
+
+		err := book.Insert()
+
+		if err != nil {
+			logs.Error("Insert => ", err)
+			this.JsonResult(6005, "保存项目失败")
+		}
+	}
+
+	key := this.Ctx.Input.Param(":key")
+	pageIndex, _ := this.GetInt("page", 1)
+
+	if key == "" {
+		this.Abort("404")
+	}
+
+	book, err := models.NewBookResult().FindByIdentify(key, this.Member.MemberId)
+	if err != nil {
+		if err == models.ErrPermissionDenied {
+			this.Abort("403")
+		}
+		this.Abort("500")
+	}
+
+	this.Data["Model"] = *book
+
+	books, totalCount, err := models.NewLinkDocument().FindForLinksByBookId(book.BookId, pageIndex, 15)
+
+	if totalCount > 0 {
+		html := utils.GetPagerHtml(this.Ctx.Request.RequestURI, pageIndex, 10, totalCount)
+		this.Data["PageHtml"] = html
+	} else {
+		this.Data["PageHtml"] = ""
+	}
+	//处理封面图片
+	for idx, book := range books {
+		book.Cover = utils.ShowImg(book.Cover, "cover")
+		books[idx] = book
+	}
+	b, err := json.Marshal(books)
+
+	if err != nil {
+		this.Data["Result"] = template.JS("[]")
+	} else {
+		this.Data["Result"] = template.JS(string(b))
+	}
+}

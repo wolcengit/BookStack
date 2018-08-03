@@ -129,4 +129,6 @@ func init() {
 	beego.Router("/sitemap.html", &controllers.BaseController{}, "get:Sitemap")
 	beego.Router("/local-render", &controllers.LocalhostController{}, "get,post:RenderMarkdown")
 	beego.Router("/*", &controllers.BaseController{}, "get:StaticFile")
+
+	beego.Router("/book/:key/links", &controllers.BookController{}, "*:Links")
 }

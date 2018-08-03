@@ -26,7 +26,7 @@ import (
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/orm"
 	"github.com/kataras/iris/core/errors"
-)
+	)
 
 // Document struct.
 type Document struct {
@@ -45,6 +45,7 @@ type Document struct {
 	AttachList   []*Attachment `orm:"-" json:"attach"`
 	Vcnt         int           `orm:"column(vcnt);default(0)" json:"vcnt"` //文档项目被浏览次数
 	Markdown     string        `orm:"-" json:"markdown"`
+	LinkId       int           `orm:"column(link_id);default(0)" json:"link_id"`       //文档关联，0无关联
 }
 
 // 多字段唯一键

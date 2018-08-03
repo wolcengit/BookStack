@@ -58,6 +58,8 @@ type Book struct {
 	Score             int       `orm:"column(score);default(40)" json:"score"` //文档项目评分，默认40，即4.0星
 	CntScore          int       //评分人数
 	CntComment        int       //评论人数
+	LinkId            int       `orm:"column(link_id);default(0)" json:"link_id"`       //文档项目关联的项目，0无关联
+	LinkDocs          string    `orm:"column(link_docs);size(2000)" json:"link_docs"`  //连接项目内容
 }
 
 // TableName 获取对应数据库表名.
@@ -497,6 +499,8 @@ func (book *Book) ToBookResult() *BookResult {
 	m.ScoreFloat = utils.ScoreFloat(book.Score)
 	m.CntScore = book.CntScore
 	m.CntComment = book.CntComment
+	m.LinkId = book.LinkId
+	m.LinkDocs = book.LinkDocs
 
 	if book.Theme == "" {
 		m.Theme = "default"

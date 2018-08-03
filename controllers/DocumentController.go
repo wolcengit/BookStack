@@ -174,9 +174,16 @@ func (this *DocumentController) Read() {
 	if doc.BookId != bookResult.BookId {
 		this.Abort("403")
 	}
-	attach, err := models.NewAttachment().FindListByDocumentId(doc.DocumentId)
-	if err == nil {
-		doc.AttachList = attach
+	if bookResult.LinkId > 0 {
+		attach, err := models.NewAttachment().FindListByDocumentId(doc.LinkId)
+		if err == nil {
+			doc.AttachList = attach
+		}
+	}else{
+		attach, err := models.NewAttachment().FindListByDocumentId(doc.DocumentId)
+		if err == nil {
+			doc.AttachList = attach
+		}
 	}
 
 	cdnimg := beego.AppConfig.String("cdnimg")
@@ -305,6 +312,10 @@ func (this *DocumentController) Edit() {
 		this.TplName = "document/" + bookResult.Editor + "_edit_template.html"
 	}
 
+	if bookResult.LinkId > 0 {
+		this.TplName = "document/link_edit_template.html"
+	}
+
 	this.Data["Model"] = bookResult
 
 	r, _ := json.Marshal(bookResult)
@@ -326,6 +337,25 @@ func (this *DocumentController) Edit() {
 		}
 	}
 	this.Data["BaiDuMapKey"] = beego.AppConfig.DefaultString("baidumapkey", "")
+   if bookResult.LinkId > 0 {
+	   if this.Ctx.Input.IsPost() {
+		   link_docs := strings.TrimSpace(this.GetString("link_docs", ""))
+		   if link_docs == "" {
+			   this.JsonResult(7000, "没有选择任何文档")
+		   }
+		   models.NewLinkDocument().SetLinkBookDocuments(bookResult.BookId,link_docs)
+		   models.NewLinkDocument().UpdateLinkBookDocuments(bookResult.BookId)
+	   }
+
+	   doclinks, docs, err := models.NewLinkDocument().GetLinkBookDocuments(bookResult.BookId)
+	   if err != nil {
+		   beego.Error(err)
+		   this.JsonResult(7000, "保存项目失败")
+	   }
+	   this.Data["LinkDocLinks"] = doclinks
+	   this.Data["LinkDocResult"] = docs
+
+   }
 
 }
 

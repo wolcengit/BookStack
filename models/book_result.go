@@ -44,6 +44,8 @@ type BookResult struct {
 	ScoreFloat       string `json:"score_float"`
 	LastModifyText   string `json:"last_modify_text"`
 	IsDisplayComment bool   `json:"is_display_comment"`
+	LinkId           int    `json:"link_id"`
+	LinkDocs         string    `json:"link_docs"`
 }
 
 func NewBookResult() *BookResult {

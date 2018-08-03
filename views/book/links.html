@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>链接 - {{.SITE_NAME}}</title>
+
+{{/*<link href="{{cdncss "/static/bootstrap/css/bootstrap.min.css"}}" rel="stylesheet">*/}}
+{{/*<link href="{{cdncss "/static/font-awesome/css/font-awesome.min.css"}}" rel="stylesheet">*/}}
+    <link href="//apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/static/css/main.css" rel="stylesheet">
+{{/*<script src="/static/html5shiv/3.7.3/html5shiv.min.js"></script>*/}}
+    <script src="//apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+{{/*<script src="/static/respond.js/1.4.2/respond.min.js"></script>*/}}
+    <script src="//apps.bdimg.com/libs/respond.js/1.4.2/respond.js"></script>
+</head>
+<body>
+<div class="manual-reader">
+    {{template "widgets/header.html" .}}
+    <div class="container manual-body">
+        <div class="row">
+            <div class="page-left">
+                <ul class="menu">
+                    <li><a href="{{urlfor "BookController.Dashboard" ":key" .Model.Identify}}" class="item"><i class="fa fa-dashboard" aria-hidden="true"></i> 概要</a> </li>
+                    <li><a href="{{urlfor "BookController.Users" ":key" .Model.Identify}}" class="item"><i class="fa fa-users" aria-hidden="true"></i> 成员</a> </li>
+                    {{if eq .Model.RoleId 0 1}}
+                    <li><a href="{{urlfor "BookController.Setting" ":key" .Model.Identify}}" class="item"><i class="fa fa-gear" aria-hidden="true"></i> 设置</a> </li>
+                    {{end}}
+                    {{if eq .Model.LinkId 0}}
+                        <li class="active"><a href="{{urlfor "BookController.Links" ":key" .Model.Identify}}" class="item"><i class="fa fa-book" aria-hidden="true"></i> 链接</a> </li>
+                    {{end}}
+                </ul>
+
+            </div>
+            <div class="page-right">
+                <div class="m-box">
+                    <div class="box-head">
+                        <strong class="box-title"> 链接管理</strong>
+                        {{if eq .Model.RoleId 0 1}}
+                        <button type="button"  class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#addBookLinkDialogModal"><i class="fa fa-user-plus" aria-hidden="true"></i> 添加链接</button>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="box-body" id="bookList">
+                        <div class="book-list">
+                            <template v-if="lists.length <= 0">
+                                <div class="text-center">暂无数据</div>
+                            </template>
+                            <template v-else>
+                                <form target="notarget" style="display: none;" action="{{urlfor "BookController.UploadProject"}}" enctype="multipart/form-data" method="post" id="uploadZip">
+                                <input type="file" name="zipfile" accept="application/zip">
+                                <input type="text" name="identify" value="">
+                                </form>
+                                <div class="list-item clearfix" v-for="item in lists">
+                                    <div class="col-sm-2 col-xs-12" style="padding-left: 0px">
+                                        <a :href="'{{urlfor "DocumentController.Index" ":key" ""}}' + item.identify" title="查看文档" data-toggle="tooltip">
+                                            <img  onerror="this.src='/static/images/book.png'"  class="img-responsive border-cover-img" :src="item.cover" alt="">
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-10 col-xs-12" style="padding-right: 0px;padding-left: 0px;">
+                                        <div class="book-title">
+                                            <div class="pull-left">
+                                                <a :href="'{{urlfor "DocumentController.Index" ":key" ""}}' + item.identify" title="查看文档" data-toggle="tooltip">
+                                                    <template v-if="item.privately_owned == 0">
+                                                        <i class="fa fa-unlock" aria-hidden="true"></i>
+                                                    </template>
+                                                    <template v-else-if="item.privately_owned == 1">
+                                                        <i class="fa fa-lock" aria-hidden="true"></i>
+                                                    </template>
+                                                    ${item.book_name}
+                                                </a>
+                                            </div>
+    
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="info">
+                                            <span title="创建者" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-user"></i> ${item.create_name}</span>
+                                            <span title="文档数量" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-pie-chart"></i> ${item.doc_count}</span>
+                                            <span title="项目角色" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-user-secret"></i> ${item.role_name}</span>
+                                            <span title="创建时间" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-clock-o"></i>
+                                                ${(new Date(item.create_time)).format("yyyy-MM-dd hh:mm:ss")}
+                                            </span>
+                                            <template v-if="item.last_modify_text !== ''">
+                                                <span title="最后编辑" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-pencil"></i> 最后编辑: ${item.last_modify_text}</span>
+                                            </template>
+                                        </div>
+                                        <div class="desc-text">
+                                            <template v-if="item.description === ''"></template>
+                                            <template v-else="">
+                                                    ${item.description}
+                                            </template>
+                                        </div>
+    
+                                        <div class="btns">
+                                            <a :href="'{{urlfor "DocumentController.Index" ":key" ""}}' + item.identify" title="查看文档" class="btn btn-default btn-sm" data-toggle="tooltip" target="_blank"><i class="fa fa-eye"></i> 查看<span class="hidden-xs">文档</span></a>
+                                            <template v-if="item.role_id != 3">
+                                                <a :href="'/api/' + item.identify + '/edit'" title="编辑文档" data-toggle="tooltip" class="btn btn-default btn-sm" target="_blank"><i class="fa fa-edit" aria-hidden="true"></i> 编辑<span class="hidden-xs">文档</span></a>
+                                            </template>
+                                            <a :href="'/book/' + item.identify + '/setting'" title="项目设置" class="btn btn-default btn-sm" data-toggle="tooltip" target="_blank"><i class="fa fa-cogs"></i> <span class="hidden-xs">项目</span>设置</a>
+                                            <a :href="'/book/'+ item.identify +'/generate'" class="btn btn-default btn-sm ajax-get confirm" :data-identify="item.identify">
+                                                <i class="fa fa-book"></i> 生成下载文档
+                                            </a>
+    
+                                        </div>
+                                    </div>
+    
+                                </div>
+                            </template>
+                        </div>
+                        <template v-if="lists.length >= 0">
+                            <nav class="pagination-container">
+                                {{.PageHtml}}
+                            </nav>
+                        </template>
+                    </div>
+    
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="addBookLinkDialogModal" tabindex="-1" role="dialog" aria-labelledby="addBookLinkDialogModalLabel">
+    <div class="modal-dialog" role="document" style="width: 655px">
+        <form method="post" autocomplete="off" action="{{urlfor "BookController.Links"}}" id="addBookDialogForm">
+            <input type="hidden" name="link_id" value="{{.Model.BookId}}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添加链接</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="标题(不超过100字)" name="book_name" id="bookName" value="{{.Model.BookName}} copy" >
+                    </div>
+                    <div class="form-group">
+                        <div class="pull-left" style="padding: 7px 5px 6px 0">
+                        {{.BaseUrl}}{{urlfor "DocumentController.Index" ":key" ""}}
+                        </div>
+                        <input type="text" class="form-control pull-left" style="width: 220px;vertical-align: middle" placeholder="项目唯一标识(不能超过50字)" name="identify" id="identify" value="{{.Model.Identify}}-1"｝>
+                        <div class="clearfix"></div>
+                        <p class="text" style="font-size: 12px;color: #999;margin-top: 6px;">项目标识只能包含小写字母、数字，以及“-”和“_”符号,并且只能小写字母开头</p>
+
+                    </div>
+                    <div class="form-group">
+                        <textarea name="description" id="description" class="form-control" placeholder="描述信息不超过500个字符" style="height: 90px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-6">
+                            <label>
+                                <input type="radio" name="privately_owned" value="0" checked> 公开<span class="text">(任何人都可以访问)</span>
+                            </label>
+                        </div>
+                        <div class="col-lg-6">
+                            <label>
+                                <input type="radio" name="privately_owned" value="1"> 私有<span class="text">(只要参与者或使用令牌才能访问)</span>
+                            </label>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <!--
+				{{/*
+                <div class="form-group">
+                    <div class="col-lg-3">
+                        <label>
+                            <input type="radio" checked name="comment_status" value="open">允许所有人评论<span class="text"></span>
+                        </label>
+                    </div>
+                    <div class="col-lg-3">
+                        <label>
+                            <input type="radio"  name="comment_status" value="closed">关闭评论<span class="text"></span>
+                        </label>
+                    </div>
+                    <div class="col-lg-3">
+                        <label>
+                            <input type="radio" name="comment_status" value="group_only">仅允许参与者评论<span class="text"></span>
+                        </label>
+                    </div>
+                    <div class="col-lg-3">
+                        <label>
+                            <input type="radio" name="comment_status" value="registered_only">仅允许注册者评论<span class="text"></span>
+                        </label>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+				*/}}
+				-->
+                    <div class="clearfix"></div>
+                </div>
+                <div class="modal-footer">
+                    <span id="form-error-message"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-success" id="btnSaveDocument" data-loading-text="保存中...">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div><!--END Modal-->
+{{/*<script src="/static/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>*/}}
+<script src="//apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js" type="text/javascript"></script>
+{{/*<script src="/static/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>*/}}
+<script src="//apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js" type="text/javascript"></script>
+
+<script src="{{$.StaticDomain}}/static/vuejs/vue.min.js"></script>
+<script src="{{$.StaticDomain}}/static/js/jquery.form.js" type="text/javascript"></script>
+<script src="/static/js/main.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#addBookLinkDialogForm").ajaxForm({
+            beforeSubmit : function () {
+                var bookName = $.trim($("#bookName").val());
+                if(bookName === ""){
+                    return showError("项目标题不能为空")
+                }
+                if(bookName.length > 100){
+                    return showError("项目标题必须小于100字符");
+                }
+
+                var identify = $.trim($("#identify").val());
+                if(identify === ""){
+                    return showError("项目标识不能为空");
+                }
+                if(identify.length > 50){
+                    return showError("项目标识必须小于50字符");
+                }
+                var description = $.trim($("#description").val());
+
+                if(description.length > 500){
+                    return showError("描述信息不超过500个字符");
+                }
+                $("#btnSaveDocument").button("loading");
+                return showSuccess("");
+            },
+            success : function (res) {
+                $("#btnSaveDocument").button("reset");
+                if(res.errcode === 0){
+                    window.app.lists.splice(0,0,res.data);
+                    $("#addBookDialogModal").modal("hide");
+                }else{
+                    showError(res.message);
+                }
+
+            }
+        });
+
+        var app = new Vue({
+            el : "#bookList",
+            data : {
+                lists : {{.Result}},
+            },
+            delimiters : ['${','}'],
+        });
+        Vue.nextTick(function () {
+            $("[data-toggle='tooltip']").tooltip();
+        });
+    });
+</script>
+</body>
+</html>

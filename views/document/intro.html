@@ -45,8 +45,9 @@
                             {{end}}
                         </a>
                         <a data-target="#ModalDownload" data-toggle="modal" href="#" target="_blank" class="btn btn-danger"><i class="fa fa-cloud-download"></i> 下载</a>
+                        {{if eq .Member.Role 0}}
                         <a href="#" data-target="#ModalShare" data-toggle="modal" class="btn btn-info"><i class="fa fa-share-alt"></i> &nbsp;分享</a>
-
+                        {{end}}
                     </div>
                 </li>
             </ul>
@@ -67,7 +68,9 @@
                 {{end}}
                 </a>
                 <a data-target="#ModalDownload" data-toggle="modal" href="#" target="_blank" class="btn btn-danger"><i class="fa fa-cloud-download"></i>下载</a>
+                {{if eq .Member.Role 0}}
                 <a href="#" data-target="#ModalShare" data-toggle="modal" class="btn btn-info"><i class="fa fa-share-alt"></i>分享</a>
+                {{end}}
             </div>
         </div>
 
