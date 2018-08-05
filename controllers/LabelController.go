@@ -17,7 +17,7 @@ func (this *LabelController) Prepare() {
 	this.BaseController.Prepare()
 
 	//如果没有开启你们访问则跳转到登录
-	if !this.EnableAnonymous && this.Member == nil {
+	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 		return
 	}

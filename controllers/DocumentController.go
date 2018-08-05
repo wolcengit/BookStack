@@ -104,7 +104,7 @@ func (this *DocumentController) Index() {
 	tab := strings.ToLower(this.GetString("tab"))
 
 	//如果没有开启匿名访问则跳转到登录
-	if !this.EnableAnonymous && this.Member == nil {
+	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 		return
 	}
@@ -145,7 +145,7 @@ func (this *DocumentController) Read() {
 	}
 
 	//如果没有开启你们匿名则跳转到登录
-	if !this.EnableAnonymous && this.Member == nil {
+	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 		return
 	}
@@ -1006,7 +1006,7 @@ func (this *DocumentController) Export() {
 //	}
 //
 //	//如果没有开启你们访问则跳转到登录
-//	if !this.EnableAnonymous && this.Member == nil {
+//	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 //		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 //		return
 //	}
@@ -1152,7 +1152,7 @@ func (this *DocumentController) Search() {
 	if identify == "" {
 		this.JsonResult(6001, "参数错误")
 	}
-	if !this.EnableAnonymous && this.Member == nil {
+	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 		return
 	}

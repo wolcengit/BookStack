@@ -39,7 +39,7 @@ func (this *HomeController) Index() {
 	this.TplName = "home/index.html"
 	this.Data["IsHome"] = true
 	//如果没有开启匿名访问，则跳转到登录页面
-	if !this.EnableAnonymous && this.Member == nil {
+	if !this.EnableAnonymous && this.Member.MemberId == 0 {
 		this.Redirect(beego.URLFor("AccountController.Login"), 302)
 	}
 
