@@ -1,5 +1,5 @@
 # image wolcen/bookstack:1.4-Z4
-FROM wolcen/calibre
+FROM wolcen/calibre:1.1
 LABEL author="wolcen@msn.com"
 
 

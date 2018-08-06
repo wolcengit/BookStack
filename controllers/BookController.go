@@ -647,16 +647,19 @@ func (this *BookController) Release() {
 func (this *BookController) Generate() {
 	identify := this.GetString(":key")
 	book, err := models.NewBook().FindByIdentify(identify)
+	if err != nil {
+		this.JsonResult(1, "失败，无法识别您要生成的文档")
+	}
 
 	//书籍正在生成离线文档
 	if isGenerating := utils.BooksGenerate.Exist(book.BookId); isGenerating {
 		this.JsonResult(1, "上一次下载文档生成任务正在后台执行，请您稍后再执行新的下载文档生成操作")
 	}
 
-	if err != nil || book.MemberId != this.Member.MemberId {
-		beego.Error(err)
-		this.JsonResult(1, "项目不存在；或您不是文档创始人，没有文档生成权限")
-	}
+	//if err != nil || book.MemberId != this.Member.MemberId {
+	//	beego.Error(err)
+	//	this.JsonResult(1, "项目不存在；或您不是文档创始人，没有文档生成权限")
+	//}
 
 	baseUrl := "http://localhost:" + beego.AppConfig.String("httpport")
 	go new(models.Document).GenerateBook(book, baseUrl)

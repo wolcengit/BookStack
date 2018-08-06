@@ -968,6 +968,10 @@ func (this *DocumentController) Export() {
 		if book.PrivatelyOwned == 1 && this.Member.MemberId != book.MemberId {
 			this.JsonResult(1, "私有文档，禁止导出")
 		} else {
+			//书籍正在生成离线文档
+			if isGenerating := utils.BooksGenerate.Exist(book.BookId); isGenerating {
+				this.JsonResult(1, "下载文档生成任务正在后台执行，请您稍后再下载文档")
+			}
 			//查询文档是否存在
 			obj := fmt.Sprintf("projects/%v/books/%v%v", book.Identify, book.GenerateTime.Unix(), ext)
 			switch utils.StoreType {
