@@ -131,4 +131,5 @@ func init() {
 	beego.Router("/*", &controllers.BaseController{}, "get:StaticFile")
 
 	beego.Router("/book/:key/links", &controllers.BookController{}, "*:Links")
+	beego.Router("/mindoc/rest", &controllers.MinDocRestController{}, "post:PostContent")
 }
