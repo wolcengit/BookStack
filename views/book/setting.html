@@ -46,20 +46,20 @@
                 <div class="m-box">
                     <div class="box-head">
                         <strong class="box-title"> 项目设置</strong>
-                        {{if eq .Model.RoleId 0}}
+                        {{if eq .Model.RoleId 0 1}}
                         <button type="button"  class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#transferBookModal">转让项目</button>
                         {{if eq .Model.PrivatelyOwned 1}}
                         <button type="button"  class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#changePrivatelyOwnedModal" style="margin-right: 5px;">转为公有</button>
                         {{else}}
                         <button type="button"  class="btn btn-danger btn-sm pull-right" data-toggle="modal" data-target="#changePrivatelyOwnedModal" style="margin-right: 5px;">转为私有</button>
                         {{end}}
+                        <button type="button"  class="btn btn-danger btn-sm pull-right" style="margin-right: 5px;" data-toggle="modal" data-target="#deleteBookModal">删除项目</button>
+                        {{end}}
+                        {{if eq .Model.RoleId 0 1}}
                         <a href="{{urlfor "BookController.Generate" ":key" .Model.Identify}}" style="margin-right: 5px;"  class="btn btn-success btn-sm ajax-get  pull-right">
                             生成下载文档
                         </a>
-                        <button type="button"  class="btn btn-danger btn-sm pull-right" style="margin-right: 5px;" data-toggle="modal" data-target="#deleteBookModal">删除项目</button>
-
                         {{end}}
-
                     </div>
                 </div>
                 <div class="box-body">
