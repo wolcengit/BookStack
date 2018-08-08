@@ -2,8 +2,9 @@ package store
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
+	"io"
+	"path/filepath"
 )
 
 //本地存储
@@ -22,18 +23,19 @@ func (this *Local) IsObjectExist(object string) (err error) {
 //@param            save             存储文件，不建议与临时文件相同，特别是IsDel参数值为true的时候
 //@param            IsDel            文件上传后，是否删除临时文件
 func (this *Local) MoveToStore(tmpfile, save string) (err error) {
-	save = strings.TrimLeft(save, "/")
+	err = nil
+	//save = strings.TrimLeft(save, "/")
 	//"./a.png"与"a.png"是相同路径
-	if strings.HasPrefix(tmpfile, "./") || strings.HasPrefix(save, "./") {
-		tmpfile = strings.TrimPrefix(tmpfile, "./")
-		save = strings.TrimPrefix(save, "./")
-	}
+	//if strings.HasPrefix(tmpfile, "./") || strings.HasPrefix(save, "./") {
+	//	tmpfile = strings.TrimPrefix(tmpfile, "./")
+	//	save = strings.TrimPrefix(save, "./")
+	//}
 	if strings.ToLower(tmpfile) != strings.ToLower(save) { //不是相同文件路径
-
 		os.MkdirAll(filepath.Dir(save), os.ModePerm)
-		err = os.Rename(tmpfile, save)
+		//err = os.Rename(tmpfile, save)
+		_,err = CopyFile(tmpfile, save)
 	}
-	return
+	return err
 }
 
 //从OSS中删除文件
@@ -49,4 +51,17 @@ func (this *Local) DelFiles(object ...string) error {
 //删除文件夹
 func (this *Local) DelFromFolder(folder string) (err error) {
 	return os.RemoveAll(folder)
+}
+func CopyFile(srcName,dstName string) (written int64, err error) {
+	src, err := os.Open(srcName)
+	if err != nil {
+		return 0, err
+	}
+	defer src.Close()
+	dst, err := os.OpenFile(dstName, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return 0, err
+	}
+	defer dst.Close()
+	return io.Copy(dst, src)
 }
