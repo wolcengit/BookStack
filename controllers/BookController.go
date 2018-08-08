@@ -235,9 +235,9 @@ func (this *BookController) PrivatelyOwned() {
 		this.JsonResult(6001, err.Error())
 	}
 	//只有创始人才能变更私有状态
-	if bookResult.RoleId != conf.BookFounder {
-		this.JsonResult(6002, "权限不足")
-	}
+	//if bookResult.RoleId != conf.BookFounder {
+	//	this.JsonResult(6002, "权限不足")
+	//}
 
 	if _, err = orm.NewOrm().QueryTable("md_books").Filter("book_id", bookResult.BookId).Update(orm.Params{
 		"privately_owned": state,
@@ -577,9 +577,9 @@ func (this *BookController) Delete() {
 		this.JsonResult(6001, err.Error())
 	}
 
-	if bookResult.RoleId != conf.BookFounder {
-		this.JsonResult(6002, "只有创始人才能删除项目")
-	}
+	//if bookResult.RoleId != conf.BookFounder {
+	//	this.JsonResult(6002, "只有创始人才能删除项目")
+	//}
 
 	//用户密码
 	pwd := this.GetString("password")

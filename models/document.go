@@ -276,6 +276,7 @@ func (m *Document) GenerateBook(book *Book, base_url string) {
 	}
 
 	//生成致谢信内容
+	/*
 	if htmlstr, err := utils.ExecuteViewPathTemplate("document/tpl_statement.html", map[string]interface{}{"Model": book, "Nickname": Nickname, "Date": ExpCfg.Timestamp}); err == nil {
 		h1Title := "说明"
 		if doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlstr)); err == nil {
@@ -291,13 +292,14 @@ func (m *Document) GenerateBook(book *Book, base_url string) {
 		ioutil.WriteFile(htmlname, []byte(htmlstr), os.ModePerm)
 		ExpCfg.Toc = append(ExpCfg.Toc, toc)
 	}
-	ModelStore := new(DocumentStore)
+	*/
+	//ModelStore := new(DocumentStore)
 	for _, doc := range docs {
-		content := strings.TrimSpace(ModelStore.GetFiledById(doc.DocumentId, "content"))
-		if utils.GetTextFromHtml(content) == "" { //内容为空，渲染文档内容，并再重新获取文档内容
-			utils.RenderDocumentById(doc.DocumentId)
-			orm.NewOrm().Read(doc, "document_id")
-		}
+		//content := strings.TrimSpace(ModelStore.GetFiledById(doc.DocumentId, "content"))
+		//if utils.GetTextFromHtml(content) == "" { //内容为空，渲染文档内容，并再重新获取文档内容
+		//	utils.RenderDocumentById(doc.DocumentId)
+		//	orm.NewOrm().Read(doc, "document_id")
+		//}
 
 		//将图片链接更换成绝对链接
 		toc := converter.Toc{
@@ -308,7 +310,8 @@ func (m *Document) GenerateBook(book *Book, base_url string) {
 		}
 		ExpCfg.Toc = append(ExpCfg.Toc, toc)
 		//图片处理，如果图片路径不是http开头，则表示是相对路径的图片，加上BaseUrl.如果图片是以http开头的，下载下来
-		if gq, err := goquery.NewDocumentFromReader(strings.NewReader(doc.Release)); err == nil {
+		gq, err := goquery.NewDocumentFromReader(strings.NewReader(doc.Release));
+		if err == nil {
 			gq.Find("img").Each(func(i int, s *goquery.Selection) {
 				pic := ""
 				if src, ok := s.Attr("src"); ok {
@@ -390,7 +393,10 @@ func (m *Document) GenerateBook(book *Book, base_url string) {
 				ModelStoreOss.SetObjectMeta(newBook+ext, book.BookName+ext)
 			}
 		case utils.StoreLocal: //本地存储
-			ModelStoreLocal.MoveToStore(folder+"output/book"+ext, "uploads/"+newBook+ext)
+			err = ModelStoreLocal.MoveToStore(folder+"output/book"+ext, "uploads/"+newBook+ext)
+			if err != nil{
+				beego.Error(err.Error())
+			}
 		}
 
 	}
