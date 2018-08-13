@@ -116,6 +116,11 @@ func (this *DocumentController) Index() {
 	this.TplName = "document/intro.html"
 	this.Data["Book"] = bookResult
 
+	if bookResult.LinkId > 0 {
+		models.NewLinkDocument().UpdateLinkBookDocuments(bookResult.BookId)
+	}
+	models.NewLinkDocument().FixedBookDocuments(bookResult.BookId);
+
 	switch tab {
 	case "comment", "score":
 	default:
@@ -175,7 +180,6 @@ func (this *DocumentController) Read() {
 		this.Abort("403")
 	}
 	if bookResult.LinkId > 0 {
-		models.NewLinkDocument().UpdateLinkBookDocuments(bookResult.BookId)
 		attach, err := models.NewAttachment().FindListByDocumentId(doc.LinkId)
 		if err == nil {
 			doc.AttachList = attach
@@ -345,7 +349,6 @@ func (this *DocumentController) Edit() {
 				this.JsonResult(7000, "没有选择任何文档")
 			}
 			models.NewLinkDocument().SetLinkBookDocuments(bookResult.BookId, link_docs)
-			models.NewLinkDocument().UpdateLinkBookDocuments(bookResult.BookId)
 		}
 
 		doclinks, docs, err := models.NewLinkDocument().GetLinkBookDocuments(bookResult.BookId)

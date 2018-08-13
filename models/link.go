@@ -3,8 +3,7 @@ package models
 import (
 	"encoding/json"
 	"github.com/astaxie/beego/orm"
-	"strings"
-)
+	)
 
 type LinkDocument struct {
 	LinkId int `json:"link_id"`
@@ -57,27 +56,41 @@ func (m *LinkDocument) SetLinkBookDocuments(book_id int, link_docs string) (err 
 		return err
 	}
 	o := orm.NewOrm()
+	o.Raw("UPDATE md_books SET link_docs = ? WHERE book_id = ?", link_docs, book_id).Exec()
 
-	doc_cnt := strings.Count(link_docs, ",")
-	o.Raw("UPDATE md_books SET link_docs = ?,doc_count=? WHERE book_id = ?", link_docs, doc_cnt, book_id).Exec()
-
-	sql := `DELETE FROM md_documents WHERE book_id = ? AND FIND_IN_SET(link_id,?) = 0 `
-	o.Raw(sql, book.BookId, link_docs).Exec()
-
-	sql = `INSERT INTO md_documents (document_name,identify,book_id,parent_id,order_sort,create_time,member_id,modify_time,modify_at,version,vcnt,link_id ) SELECT document_name,CONCAT(identify,document_id),?,parent_id,order_sort,create_time,member_id,modify_time,modify_at,version,0,document_id  FROM md_documents  WHERE book_id = ? AND FIND_IN_SET(document_id,?) > 0  AND document_id NOT IN(SELECT link_id FROM md_documents WHERE book_id = ? )`
-	o.Raw(sql, book.BookId, book.LinkId, link_docs, book.BookId).Exec()
-
-	sql = `UPDATE md_documents as a, (select b.parent_id as bpid,b.document_id as bdid,c.document_id as cpid from md_documents b ,md_documents c where b.parent_id = c.link_id and c.book_id = ?) as b SET a.parent_id = b.cpid  WHERE a.book_id = ? AND a.parent_id > 0;`
-	o.Raw(sql, book.BookId, book.BookId).Exec()
+	m.UpdateLinkBookDocuments(book.BookId)
 
 	return nil
 }
 
 func (m *LinkDocument) UpdateLinkBookDocuments(book_id int) (err error) {
 
+	book, err := NewBook().Find(book_id)
+	if err != nil {
+		return err
+	}
 	o := orm.NewOrm()
-	sql := `UPDATE md_documents a,md_documents b SET a.document_name = b.document_name,a.identify = b.identify,a.release = b.release,a.order_sort = b.order_sort,a.modify_time = b.modify_time,a.version = b.version WHERE a.book_id = ? AND a.link_id = b.document_id `
-	o.Raw(sql, book_id).Exec()
+
+	sql := `DELETE FROM md_documents WHERE book_id = ? AND FIND_IN_SET(link_id,?) = 0 `
+	o.Raw(sql, book.BookId, book.LinkDocs).Exec()
+
+	sql = `INSERT INTO md_documents (document_name,identify,book_id,parent_id,order_sort,create_time,member_id,modify_time,modify_at,version,vcnt,link_id ) SELECT document_name,CONCAT(identify,document_id),?,parent_id,order_sort,create_time,member_id,modify_time,modify_at,version,0,document_id  FROM md_documents  WHERE book_id = ? AND FIND_IN_SET(document_id,?) > 0  AND document_id NOT IN(SELECT link_id FROM md_documents WHERE book_id = ? )`
+	o.Raw(sql, book.BookId, book.LinkId, book.LinkDocs, book.BookId).Exec()
+
+	sql = `UPDATE md_documents a,md_documents b SET a.parent_id = b.parent_id WHERE a.link_id = b.document_id AND a.book_id = ? `
+	o.Raw(sql, book.BookId).Exec()
+
+	sql = `UPDATE md_documents as a, (select b.parent_id as bpid,b.document_id as bdid,c.document_id as cpid from md_documents b ,md_documents c where b.parent_id = c.link_id and c.book_id = ?) as b SET a.parent_id = b.cpid  WHERE a.book_id = ? AND a.parent_id > 0 AND a.parent_id = b.bpid;`
+	o.Raw(sql, book.BookId, book.BookId).Exec()
+
+	sql = `UPDATE md_documents a,md_documents b SET a.document_name = b.document_name,a.identify = b.identify,a.release = b.release,a.order_sort = b.order_sort,a.modify_time = b.modify_time,a.version = b.version WHERE a.book_id = ? AND a.link_id = b.document_id `
+	o.Raw(sql, book.BookId).Exec()
+
+	sql = `UPDATE md_documents a,md_documents b SET a.document_name = b.document_name,a.identify = b.identify,a.release = b.release,a.order_sort = b.order_sort,a.modify_time = b.modify_time,a.version = b.version WHERE a.book_id = ? AND a.link_id = b.document_id `
+	o.Raw(sql, book.BookId).Exec()
+
+	sql = `UPDATE md_documents a,md_document_store b SET a.release = b.content WHERE a.book_id = ? AND a.link_id = b.document_id AND a.release = '';`
+	o.Raw(sql, book.BookId).Exec()
 
 	return nil
 }
@@ -123,3 +136,14 @@ func (m *LinkDocument) GetLinkBookDocuments(book_id int) (doclinks string, docli
 	}
 	return doclinks, doclist, nil
 }
+
+
+func (m *LinkDocument) FixedBookDocuments(book_id int) (err error) {
+	o := orm.NewOrm()
+
+	sql := `UPDATE md_documents SET identify = UUID() WHERE book_id = ? AND identify = '';`
+	o.Raw(sql, book_id).Exec()
+
+	return nil
+}
+
