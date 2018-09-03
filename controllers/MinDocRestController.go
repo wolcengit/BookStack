@@ -8,6 +8,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/TruthHun/BookStack/models"
 	"github.com/astaxie/beego/orm"
+	"github.com/TruthHun/BookStack/utils"
 )
 
 // MinDocRestController struct.
@@ -68,11 +69,15 @@ func (c *MinDocRestController) PostContent() {
 	ModelStore := new(models.DocumentStore)
 	doc_id, err := doc.InsertOrUpdate()
 	if err == nil {
-		if err := ModelStore.InsertOrUpdate(models.DocumentStore{
+		err := ModelStore.InsertOrUpdate(models.DocumentStore{
 			DocumentId: int(doc_id),
 			Markdown:   textmd,
-		}, "markdown"); err != nil {
+			Content: "",
+		}, "markdown")
+		if  err != nil {
 			beego.Error(err)
+		}else {
+			utils.RenderDocumentById(doc.DocumentId)
 		}
 	} else {
 		beego.Error(err.Error())
