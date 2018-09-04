@@ -99,8 +99,13 @@ func init() {
 	beego.Router("/history/restore", &controllers.DocumentController{}, "*:RestoreHistory")
 
 	beego.Router("/books/:key", &controllers.DocumentController{}, "*:Index")
+	beego.Router("/read/:key", &controllers.DocumentController{}, "*:Index")
 	beego.Router("/read/:key/:id", &controllers.DocumentController{}, "*:Read")
 	beego.Router("/read/:key/search", &controllers.DocumentController{}, "post:Search")
+
+	beego.Router("/docs/:key", &controllers.DocumentController{}, "*:Index")
+	beego.Router("/docs/:key/:id", &controllers.DocumentController{}, "*:Read")
+	beego.Router("/docs/:key/search", &controllers.DocumentController{}, "post:Search")
 
 	beego.Router("/export/:key", &controllers.DocumentController{}, "*:Export")
 	beego.Router("/qrcode/:key.png", &controllers.DocumentController{}, "get:QrCode")
