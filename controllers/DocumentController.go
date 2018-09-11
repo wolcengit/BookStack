@@ -968,7 +968,7 @@ func (this *DocumentController) Export() {
 		this.JsonResult(1, "下载失败，无法识别您要下载的文档")
 	}
 	if book, err := new(models.Book).FindByIdentify(identify); err == nil {
-		if book.PrivatelyOwned == 1 && this.Member.MemberId != book.MemberId {
+		if book.PrivatelyOwned == 1 && this.Member.MemberId != book.MemberId && !this.Member.IsAdministrator() {
 			this.JsonResult(1, "私有文档，禁止导出")
 		} else {
 			//书籍正在生成离线文档
