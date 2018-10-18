@@ -3,15 +3,15 @@ FROM wolcen/calibre:1.1
 LABEL author="wolcen@msn.com"
 
 
+COPY lib/time/zoneinfo.zip /usr/local/go/lib/time/
 ADD conf/*.conf.example /bookstack/conf/
 ADD dictionary /bookstack/dictionary/
 ADD static /bookstack/static/
-ADD views /bookstack/views/
 ADD *.md /bookstack/
 ADD favicon.ico /bookstack/
-ADD BookStack /bookstack/
 ADD start.sh /bookstack/
-COPY lib/time/zoneinfo.zip /usr/local/go/lib/time/
+ADD views /bookstack/views/
+ADD BookStack /bookstack/
 
 WORKDIR /bookstack
 RUN chmod +x /bookstack/BookStack
