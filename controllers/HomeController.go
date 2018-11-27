@@ -45,8 +45,8 @@ func (this *HomeController) Index() {
 
 	pageIndex, _ := this.GetInt("page", 1)
 	//每页显示24个，为了兼容Pad、mobile、PC
-	pageSize := 24
-	books, totalCount, err := models.NewBook().HomeData(pageIndex, pageSize, models.BookOrder(tab), cid)
+	pageSize := 12
+	books, totalCount, err := models.NewBook().HomeData(pageIndex, pageSize, models.BookOrder(tab), cid,this.Member)
 	if err != nil {
 		beego.Error(err)
 		this.Abort("404")

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# last is 22
+# last is 24
 IDX=$1
 TAG="172.10.60.2/wolcen/bookstack:1.4-Z$IDX"
 docker build -t $TAG .

@@ -294,14 +294,21 @@ func (m *Book) ThoroughDeleteBook(id int) error {
 //首页数据
 //TODO:完善根据分类查询数据
 //orderType:排序条件，可选值：recommend(推荐)、latest（）
-func (m *Book) HomeData(pageIndex, pageSize int, orderType BookOrder, cid int, fields ...string) (books []Book, totalCount int, err error) {
+func (m *Book) HomeData(pageIndex, pageSize int, orderType BookOrder, cid int,member *Member, fields ...string) (books []Book, totalCount int, err error) {
 	if cid > 0 { //针对cid>0
 		return m.homeData(pageIndex, pageSize, orderType, cid, fields...)
 	}
 	o := orm.NewOrm()
 	order := ""   //排序
 	condStr := "" //查询条件
-	cond := []string{"privately_owned=0"}
+	// 首页显示有权限的书籍而不是共有书籍
+	//cond := []string{"privately_owned=0"}
+	var cond  []string
+	if !member.IsAdministrator(){
+		cond = []string{"privately_owned=0 or book_id in(select book_id from md_relationship where book_id = md_books.book_id and member_id ="+fmt.Sprintf("%d",member.MemberId)+" )"}
+	}else{
+		cond = []string{" 1=1 "}
+	}
 	if len(fields) == 0 {
 		fields = append(fields, "book_id", "book_name", "identify", "cover")
 	}
